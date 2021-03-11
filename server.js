@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const User = require("./users.js");
+const Exercise = require("./exercises.js");
+
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -43,8 +45,9 @@ app.get("/api/exercise/users", (req, res) => {
     });
 });
 
-app.post("/api/exercise/add");
-app.get("/api/exercise/log");
+app.post("/api/exercise/add", (req, res) => {});
+
+app.get("/api/exercise/log", (req, res) => {});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
