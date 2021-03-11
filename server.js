@@ -1,18 +1,48 @@
 require("dotenv").config();
-
 const express = require("express");
+const User = require("./users.js");
 const app = express();
 const cors = require("cors");
-require("dotenv").config();
+const bodyParser = require("body-parser");
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
+app.use(urlencodedParser);
 
 app.use(cors());
 app.use(express.static("public"));
+app.use(express.json());
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-app.post("/api/exercise/new-user");
-app.get("/api/exercise/users");
+app.post("/api/exercise/new-user", async (req, res) => {
+  const { username } = req.body;
+  try {
+    const existingUser = await User.find({ username: username });
+    if (existingUser.length !== 0) {
+      return res.status(400).json("User already exist");
+    }
+    const newUser = new User({
+      username,
+    });
+    newUser.save().then((result) => {
+      res.status(200).json(result);
+    });
+  } catch {
+    return res.status(500).send({ error: "Problems with our server" });
+  }
+});
+
+app.get("/api/exercise/users", (req, res) => {
+  User.find({})
+    .then((result) => {
+      console.log(result);
+      res.json(result);
+    })
+    .catch(() => {
+      res.status(500).json({ error: "server error" });
+    });
+});
+
 app.post("/api/exercise/add");
 app.get("/api/exercise/log");
 
