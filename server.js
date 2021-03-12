@@ -74,21 +74,20 @@ app.post("/api/exercise/add", async (req, res) => {
 });
 
 app.get("/api/exercise/log", (request, response) => {
-  const { userId, from, to, limit } = request.query;
-  User.findById(userId, (error, result) => {
+  User.findById(request.query.userId, (error, result) => {
     if (!error) {
       let user = result;
 
-      if (from || to) {
+      if (request.query.from || request.query.to) {
         let fromDate = new Date(0);
         let toDate = new Date();
 
-        if (from) {
-          fromDate = new Date(from);
+        if (request.query.from) {
+          fromDate = new Date(request.query.from);
         }
 
-        if (to) {
-          toDate = new Date(to);
+        if (request.query.to) {
+          toDate = new Date(request.query.to);
         }
 
         fromDate = fromDate.getTime();
@@ -101,10 +100,12 @@ app.get("/api/exercise/log", (request, response) => {
         });
       }
 
-      if (limit) {
-        user.log = user.log.slice(0, limit);
+      if (request.query.limit) {
+        user.log = user.log.slice(0, request.query.limit);
       }
 
+      // user1 = user.toJSON();
+      // user["count"] = result.log.length;
       response.json({
         _id: user.id,
         username: user.username,
@@ -114,6 +115,39 @@ app.get("/api/exercise/log", (request, response) => {
     }
   });
 });
+// app.get("/api/exercise/log", async (req, res) => {
+//   const { userId, from, to, limit } = req.query;
+
+//   const userLog = await User.findById(userId).then((user) => {
+//     return user.log;
+//   });
+//   ///////////////////////////////////////
+
+//   if (from) {
+//     const fromDate = new Date(from);
+//     userLog = userLog.filter((exe) => new Date(exe.date) > fromDate);
+//   }
+
+//   if (to) {
+//     const toDate = new Date(to);
+//     userLog = userLog.filter((exe) => new Date(exe.date) < toDate);
+//   }
+
+//   if (limit) {
+//     userLog = userLog.slice(0, limit);
+//   }
+
+//   ///////////////////////////////////////
+
+//   User.findById(userId).then((user) => {
+//     res.json({
+//       _id: user.id,
+//       username: user.username,
+//       count: userLog.length,
+//       log: userLog,
+//     });
+//   });
+// });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
