@@ -24,10 +24,10 @@ app.post("/api/exercise/new-user", async (req, res) => {
       return res.status(400).json("User already exist");
     }
     const newUser = new User({
-      username,
+      username: username,
     });
     newUser.save().then((result) => {
-      res.status(200).json(result);
+      return res.status(200).json(result);
     });
   } catch {
     return res.status(500).send({ error: "Problems with our server" });
@@ -47,12 +47,7 @@ app.get("/api/exercise/users", (req, res) => {
 
 app.post("/api/exercise/add", async (req, res) => {
   const { userId, description, duration } = req.body;
-  let date;
-  if (req.body.date === "") {
-    date = undefined;
-  } else {
-    date = new Date(req.body.date);
-  }
+  const date = req.body.date || new Date();
 
   try {
     const existingUser = await User.findById(userId);
@@ -65,11 +60,11 @@ app.post("/api/exercise/add", async (req, res) => {
     });
     const savedExercise = await exercise.save();
     const newExercise = {
-      _id: savedExercise.userId,
       username: savedExercise.username,
-      date: savedExercise.date.toDateString(),
-      duration: savedExercise.duration,
       description: savedExercise.description,
+      duration: savedExercise.duration,
+      _id: savedExercise.userId,
+      date: savedExercise.date.toDateString(),
     };
     return res.status(200).json(newExercise);
   } catch (err) {
