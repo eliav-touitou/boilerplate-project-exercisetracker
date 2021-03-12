@@ -15,6 +15,15 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    description: {
+      type: String,
+    },
+    duration: {
+      type: Number,
+    },
+    date: {
+      type: String,
+    },
   },
   {
     versionKey: false,

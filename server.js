@@ -43,35 +43,50 @@ app.get("/api/exercise/users", (req, res) => {
     });
 });
 
-app.post("/api/exercise/add", async (req, res) => {
+app.post("/api/exercise/add", (req, res) => {
   const { userId, description, duration } = req.body;
   const date = new Date(req.body.date) || new Date();
 
-  try {
-    const existingUser = await User.findById(userId);
-    const exercise = new Exercise({
-      userId,
-      username: existingUser.username,
-      description,
-      duration,
-      date,
+  User.findByIdAndUpdate(
+    userId,
+    {
+      description: description,
+      duration: Number(duration),
+      date: date.toDateString(),
+    },
+    { new: true }
+  )
+    .then((updatedUser) => res.json(updatedUser))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).json({ ERROR: err.message });
+      }
+      return res.status(500).json({ ERROR: "Server problem" });
     });
-    const savedExercise = await exercise.save();
-    const newExercise = {
-      username: savedExercise.username,
-      description: savedExercise.description,
-      duration: savedExercise.duration,
-      _id: savedExercise.userId,
-      date: savedExercise.date.toDateString(),
-    };
-    return res.status(200).json(newExercise);
-  } catch (err) {
-    console.log(err);
-    if (err.name === "ValidationError") {
-      return res.status(400).json({ ERROR: err.message });
-    }
-    return res.status(500).json({ ERROR: "Server problem" });
-  }
+  // }})
+  // const exercise = new Exercise({
+  //   userId,
+  //   username: existingUser.username,
+  //   description,
+  //   duration,
+  //   date,
+  // });
+  // const savedExercise = await exercise.save();
+  // const newExercise = {
+  //   username: savedExercise.username,
+  //   description: savedExercise.description,
+  //   duration: savedExercise.duration,
+  //   _id: savedExercise.userId,
+  //   date: savedExercise.date.toDateString(),
+  // };
+  // return res.status(200).json(newExercise);
+  // } catch (err) {
+  //   console.log(err);
+  //   if (err.name === "ValidationError") {
+  //     return res.status(400).json({ ERROR: err.message });
+  //   }
+  //   return res.status(500).json({ ERROR: "Server problem" });
+  // }
 });
 
 app.get("/api/exercise/log", (req, res) => {});
