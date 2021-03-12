@@ -73,21 +73,22 @@ app.post("/api/exercise/add", async (req, res) => {
     });
 });
 
-app.get("/api/exercise/log", (request, response) => {
-  User.findById(request.query.userId, (error, result) => {
+app.get("/api/exercise/log", (req, res) => {
+  const { userId, from, to, limit } = req.query;
+  User.findById(userId, (error, result) => {
     if (!error) {
       let user = result;
 
-      if (request.query.from || request.query.to) {
+      if (from || to) {
         let fromDate = new Date(0);
         let toDate = new Date();
 
-        if (request.query.from) {
-          fromDate = new Date(request.query.from);
+        if (from) {
+          fromDate = new Date(from);
         }
 
-        if (request.query.to) {
-          toDate = new Date(request.query.to);
+        if (to) {
+          toDate = new Date(to);
         }
 
         fromDate = fromDate.getTime();
@@ -100,13 +101,11 @@ app.get("/api/exercise/log", (request, response) => {
         });
       }
 
-      if (request.query.limit) {
-        user.log = user.log.slice(0, request.query.limit);
+      if (limit) {
+        user.log = user.log.slice(0, limit);
       }
 
-      // user1 = user.toJSON();
-      // user["count"] = result.log.length;
-      response.json({
+      res.json({
         _id: user.id,
         username: user.username,
         count: user.log.length,
@@ -115,48 +114,7 @@ app.get("/api/exercise/log", (request, response) => {
     }
   });
 });
-// app.get("/api/exercise/log", async (req, res) => {
-//   const { userId, from, to, limit } = req.query;
-
-//   const userLog = await User.findById(userId).then((user) => {
-//     return user.log;
-//   });
-//   ///////////////////////////////////////
-
-//   if (from) {
-//     const fromDate = new Date(from);
-//     userLog = userLog.filter((exe) => new Date(exe.date) > fromDate);
-//   }
-
-//   if (to) {
-//     const toDate = new Date(to);
-//     userLog = userLog.filter((exe) => new Date(exe.date) < toDate);
-//   }
-
-//   if (limit) {
-//     userLog = userLog.slice(0, limit);
-//   }
-
-//   ///////////////////////////////////////
-
-//   User.findById(userId).then((user) => {
-//     res.json({
-//       _id: user.id,
-//       username: user.username,
-//       count: userLog.length,
-//       log: userLog,
-//     });
-//   });
-// });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
-
-/***********************************************************************************/
-
-// You can make a GET request to /api/exercise/log with a parameter of userId=_id to retrieve a full exercise log of any user. The returned response will be the user object with a log array of all the exercises added. Each log item has the description, duration, and date properties.
-
-// A request to a user's log (/api/exercise/log) returns an object with a count property representing the number of exercises returned.
-
-// You can add from, to and limit parameters to a /api/exercise/log request to retrieve part of the log of any user. from and to are dates in yyyy-mm-dd format. limit is an integer of how many logs to send back.
