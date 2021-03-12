@@ -73,17 +73,81 @@ app.post("/api/exercise/add", async (req, res) => {
     });
 });
 
-app.get("/api/exercise/log", (req, res) => {
-  const { userId } = req.query;
-  User.findById(userId).then((user) => {
-    res.json({
-      _id: user.id,
-      username: user.username,
-      count: user.log.length,
-      log: user.log,
-    });
+app.get("/api/exercise/log", (request, response) => {
+  User.findById(request.query.userId, (error, result) => {
+    if (!error) {
+      let user = result;
+
+      if (request.query.from || request.query.to) {
+        let fromDate = new Date(0);
+        let toDate = new Date();
+
+        if (request.query.from) {
+          fromDate = new Date(request.query.from);
+        }
+
+        if (request.query.to) {
+          toDate = new Date(request.query.to);
+        }
+
+        fromDate = fromDate.getTime();
+        toDate = toDate.getTime();
+
+        user.log = user.log.filter((session) => {
+          let sessionDate = new Date(session.date).getTime();
+
+          return sessionDate >= fromDate && sessionDate <= toDate;
+        });
+      }
+
+      if (request.query.limit) {
+        user.log = user.log.slice(0, request.query.limit);
+      }
+
+      // user1 = user.toJSON();
+      // user["count"] = result.log.length;
+      response.json({
+        _id: user.id,
+        username: user.username,
+        count: user.length,
+        log: user.log,
+      });
+    }
   });
 });
+// app.get("/api/exercise/log", async (req, res) => {
+//   const { userId, from, to, limit } = req.query;
+
+//   const userLog = await User.findById(userId).then((user) => {
+//     return user.log;
+//   });
+//   ///////////////////////////////////////
+
+//   if (from) {
+//     const fromDate = new Date(from);
+//     userLog = userLog.filter((exe) => new Date(exe.date) > fromDate);
+//   }
+
+//   if (to) {
+//     const toDate = new Date(to);
+//     userLog = userLog.filter((exe) => new Date(exe.date) < toDate);
+//   }
+
+//   if (limit) {
+//     userLog = userLog.slice(0, limit);
+//   }
+
+//   ///////////////////////////////////////
+
+//   User.findById(userId).then((user) => {
+//     res.json({
+//       _id: user.id,
+//       username: user.username,
+//       count: userLog.length,
+//       log: userLog,
+//     });
+//   });
+// });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);

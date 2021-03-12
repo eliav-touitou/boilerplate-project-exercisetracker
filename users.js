@@ -25,7 +25,6 @@ const userSchema = new mongoose.Schema(
     //   type: String,
     // },
     log: [{}],
-    count: Number,
   },
   {
     versionKey: false,
