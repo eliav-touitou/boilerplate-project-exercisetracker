@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-app.post("/api/exercise/new-user", async (req, res) => {
+app.post("/api/exercise/new-user", (req, res) => {
   const { username } = req.body;
   const user = new User({
     username: username,
@@ -24,10 +24,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
   user
     .save()
     .then((savedUser) => {
-      res.json({
-        _id: savedUser._id,
-        username: savedUser.username,
-      });
+      res.json(savedUser);
     })
     .catch((err) => {
       res.status(500).send(err.message);

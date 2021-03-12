@@ -8,7 +8,7 @@ mongoose.connect(url, {
   useFindAndModify: false,
   useCreateIndex: true,
 });
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -21,6 +21,6 @@ const userSchema = mongoose.Schema(
   }
 );
 userSchema.plugin(uniqueValidator);
-const User = mongoose.model("users", userSchema);
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);
+
 ///////////////////////////////////////////////
