@@ -18,20 +18,20 @@ app.get("/", (req, res) => {
 
 app.post("/api/exercise/new-user", async (req, res) => {
   const { username } = req.body;
-  try {
-    const existingUser = await User.find({ username: username });
-    if (existingUser.length !== 0) {
-      return res.status(400).json("User already exist");
-    }
-    const newUser = new User({
-      username: username,
+  const user = new User({
+    username: username,
+  });
+  user
+    .save()
+    .then((savedUser) => {
+      res.json({
+        _id: savedUser._id,
+        username: savedUser.username,
+      });
+    })
+    .catch((err) => {
+      res.status(500).send(err.message);
     });
-    newUser.save().then((result) => {
-      return res.status(200).json(result);
-    });
-  } catch {
-    return res.status(500).send({ error: "Problems with our server" });
-  }
 });
 
 app.get("/api/exercise/users", (req, res) => {
@@ -47,7 +47,7 @@ app.get("/api/exercise/users", (req, res) => {
 
 app.post("/api/exercise/add", async (req, res) => {
   const { userId, description, duration } = req.body;
-  const date = req.body.date || new Date();
+  const date = new Date(req.body.date) || new Date();
 
   try {
     const existingUser = await User.findById(userId);
