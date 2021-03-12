@@ -35,7 +35,6 @@ app.get("/api/exercise/users", (req, res) => {
   User.find()
     .select({ _id: 1, username: 1 })
     .then((result) => {
-      console.log(result);
       res.json(result);
     })
     .catch(() => {
@@ -43,53 +42,41 @@ app.get("/api/exercise/users", (req, res) => {
     });
 });
 
-app.post("/api/exercise/add", (req, res) => {
+app.post("/api/exercise/add", async (req, res) => {
   const { userId, description, duration } = req.body;
-  const date = new Date(req.body.date) || new Date();
+  const date = req.body.date === "" ? new Date() : new Date(req.body.date);
+  const userLog = await User.findById(userId).then((user) => user.log);
 
-  User.findByIdAndUpdate(
-    userId,
-    {
-      description: description,
-      duration: Number(duration),
-      date: date.toDateString(),
-    },
-    { new: true }
-  )
-    .then((updatedUser) => res.json(updatedUser))
+  userLog.unshift({
+    description: description,
+    duration: Number(duration),
+    date: date.toDateString(),
+  });
+  User.findByIdAndUpdate(userId, { log: userLog }, { new: true })
+    .then((updatedUser) => {
+      const usersTask = {
+        username: updatedUser.username,
+        _id: updatedUser.id,
+        date: updatedUser.log[0].date,
+        duration: updatedUser.log[0].duration,
+        description: updatedUser.log[0].description,
+      };
+      res.json(usersTask);
+    })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(400).json({ ERROR: err.message });
       }
       return res.status(500).json({ ERROR: "Server problem" });
     });
-  // }})
-  // const exercise = new Exercise({
-  //   userId,
-  //   username: existingUser.username,
-  //   description,
-  //   duration,
-  //   date,
-  // });
-  // const savedExercise = await exercise.save();
-  // const newExercise = {
-  //   username: savedExercise.username,
-  //   description: savedExercise.description,
-  //   duration: savedExercise.duration,
-  //   _id: savedExercise.userId,
-  //   date: savedExercise.date.toDateString(),
-  // };
-  // return res.status(200).json(newExercise);
-  // } catch (err) {
-  //   console.log(err);
-  //   if (err.name === "ValidationError") {
-  //     return res.status(400).json({ ERROR: err.message });
-  //   }
-  //   return res.status(500).json({ ERROR: "Server problem" });
-  // }
 });
 
-app.get("/api/exercise/log", (req, res) => {});
+app.get("/api/exercise/log", (req, res) => {
+  const { userId } = req.query;
+  User.findById(userId).then((user) => {
+    res.json(user);
+  });
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);

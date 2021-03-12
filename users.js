@@ -15,15 +15,17 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    description: {
-      type: String,
-    },
-    duration: {
-      type: Number,
-    },
-    date: {
-      type: String,
-    },
+    // description: {
+    //   type: String,
+    // },
+    // duration: {
+    //   type: Number,
+    // },
+    // date: {
+    //   type: String,
+    // },
+    log: [{}],
+    count: Number,
   },
   {
     versionKey: false,
