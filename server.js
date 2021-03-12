@@ -74,7 +74,11 @@ app.post("/api/exercise/add", async (req, res) => {
 app.get("/api/exercise/log", (req, res) => {
   const { userId } = req.query;
   User.findById(userId).then((user) => {
-    res.json(user);
+    res.json({
+      _id: user.id,
+      username: user.username,
+      log: user.log,
+    });
   });
 });
 
