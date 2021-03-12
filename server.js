@@ -45,7 +45,9 @@ app.get("/api/exercise/users", (req, res) => {
 app.post("/api/exercise/add", async (req, res) => {
   const { userId, description, duration } = req.body;
   const date = req.body.date === "" ? new Date() : new Date(req.body.date);
-  const userLog = await User.findById(userId).then((user) => user.log);
+  const userLog = await User.findById(userId).then((user) => {
+    return user.log;
+  });
 
   userLog.unshift({
     description: description,
@@ -77,6 +79,7 @@ app.get("/api/exercise/log", (req, res) => {
     res.json({
       _id: user.id,
       username: user.username,
+      count: user.log.length,
       log: user.log,
     });
   });
