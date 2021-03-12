@@ -45,7 +45,41 @@ app.get("/api/exercise/users", (req, res) => {
     });
 });
 
-app.post("/api/exercise/add", (req, res) => {});
+app.post("/api/exercise/add", async (req, res) => {
+  const { userId, description, duration } = req.body;
+  let date;
+  if (req.body.date === "") {
+    date = undefined;
+  } else {
+    date = new Date(req.body.date);
+  }
+
+  try {
+    const existingUser = await User.findById(userId);
+    const exercise = new Exercise({
+      userId,
+      username: existingUser.username,
+      description,
+      duration,
+      date,
+    });
+    const savedExercise = await exercise.save();
+    const newExercise = {
+      _id: savedExercise.userId,
+      username: savedExercise.username,
+      date: savedExercise.date.toDateString(),
+      duration: savedExercise.duration,
+      description: savedExercise.description,
+    };
+    return res.status(200).json(newExercise);
+  } catch (err) {
+    console.log(err);
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ ERROR: err.message });
+    }
+    return res.status(500).json({ ERROR: "Server problem" });
+  }
+});
 
 app.get("/api/exercise/log", (req, res) => {});
 
@@ -54,13 +88,6 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 });
 
 /***********************************************************************************/
-// You should provide your own project, not the example URL.
-
-// You can POST to /api/exercise/new-user with form data username to create a new user. The returned response will be an object with username and _id properties.
-
-// You can make a GET request to api/exercise/users to get an array of all users. Each element in the array is an object containing a user's username and _id.
-
-// You can POST to /api/exercise/add with form data userId=_id, description, duration, and optionally date. If no date is supplied, the current date will be used. The response returned will be the user object with the exercise fields added.
 
 // You can make a GET request to /api/exercise/log with a parameter of userId=_id to retrieve a full exercise log of any user. The returned response will be the user object with a log array of all the exercises added. Each log item has the description, duration, and date properties.
 
